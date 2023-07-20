@@ -1,1 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 
+#define PORT 8443
+
+int main() {
+    int serverSocket, clientSocket;
+    struct sockaddr_in server_addr, client_addr;
+    socklen_t addr_len = sizeof(client_addr);
+
+    // Create a TCP socket
+    if ((serverSocket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        perror("Socket creation failed");
+        exit(EXIT_FAILURE);
+    }
+
+    // Set up server address
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(PORT);
+
+    // Bind socket to address and port
+    if (bind(serverSocket, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1) {
+        perror("Binding failed");
+        close(serverSocket);
+        exit(EXIT_FAILURE);
+    }
+
+    if (listen(serverSocket, 1) == -1) {
+        perror("Listening failed");
+        close(serverSocket);
+        exit(EXIT_FAILURE);
+    }
+    printf("Server listening on port %d...\n", PORT);
+
+    // Accept incoming connection
+    if ((clientSocket = accept(serverSocket, (struct sockaddr *)&client_addr, &addr_len)) ==>
+        perror("Accepting connection failed");
+        close(serverSocket);
+        exit(EXIT_FAILURE);
+    }
+    // Generate a random number between 100 and 999
+    srand(time(NULL));
+    int random_number = rand() % 900 + 100;
+
+    // Send the random number to the client
+    if (send(clientSocket, &random_number, sizeof(random_number), 0) == -1) {
+        perror("Sending random number failed");
+        close(clientSocket);
+        close(serverSocket);
+        exit(EXIT_FAILURE);
+    }
+    printf("Sent random number to client: %d\n", random_number);
+
+    close(clientSocket);
+    close(serverSocket);
+    return 0;
+}
