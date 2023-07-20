@@ -2,8 +2,7 @@ import socket
 import threading
 import random
 
-quotes =
-[
+quotes = [
      "Knowledge is power – Francis Bacon",
      "Code is like humor. When you have to explain it, it’s bad. – Cory House",
      "Confusion is part of programming ― Felienne Hermans",
@@ -12,29 +11,31 @@ quotes =
      "Truth can only be found in one place: the code ― Robert C. Martin"
 ]
 
-def get_random_quote():
-     return random.choice(quotes)
-
 def handle_client(client_socket):
-    quote = get_random_quote()
-    client_socket.send(quote.encode())
-    client_socket.close()
+   try:
+      #Send a random quote to the client
+       quote = random.choice(quotes)
+       client_socket.send(quote.encode())
+   except Exception as e:
+       print("Error:", e)
+       client_socket.close()
 
-def start_server():
-    host = "0.0.0.0"
-    port = 8888
+def main():
+       server_host = "0.0.0.0"
+       server_port = 8888
 
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((host, port))
-    server_socket.listen(5)
+       server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+       server_socket.bind((server_host, server_port))
+       server_socket.listen(5)
 
-    print("QOTD Server listening on {}:{}".format(host, port))
+       print("QOTD server is listening on port 8888..")
 
-while True:
-    client_socket, client_addr = server_socket.accept()
-    print("Connected by:", client_addr)
-    client_handler = threading.Thread(target=handle_client, args=(client_socket,))
-    client_handler.start()
+       while True:
+             client_socket, client_address = server_socket.accept()
+             print("Connection established with:", client_address)
+
+             client_thread = threading.Thread(target=handle_client, args=(client_socket,))
+             client_thread.start()
 
 if __name__ == "__main__":
-    start_server()
+      main()
